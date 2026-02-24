@@ -43,6 +43,8 @@ pip install --upgrade pandas jinja2
 
 **Error:** Unexpected "Authentication" error in Spark config.
 
+<img width="873" height="676" alt="image" src="https://github.com/user-attachments/assets/985a5346-bdd3-454b-a23d-a4b8d5040f4c" />
+
 **Cause:** Accidentally hardcoded `Authentication: mode: none` in `metadata.yaml` while experimenting with removing the login page.
 
 **Solution:** Remove the hardcoded value from `metadata.yaml`.
@@ -77,6 +79,8 @@ mv ~/uber_project/uber_project/transformers/transformer_uber_data.py ~/uber_proj
 
 ## 6. "Page Unresponsive" When Editing Pipeline
 
+<img width="788" height="456" alt="image" src="https://github.com/user-attachments/assets/988871f7-5f4f-47fc-9dfa-f208a0610756" />
+
 **Error:** Constantly getting "Page Unresponsive" when clicking Edit Pipeline in Mage.
 
 **Cause:** Pipeline appears to be corrupted.
@@ -105,6 +109,8 @@ cp ../uber_project_backup/data_loaders/*.py data_loaders/
 
 ## 8. io_config.yaml Credentials Error
 
+<img width="658" height="172" alt="image" src="https://github.com/user-attachments/assets/43dea727-b0f8-4d8d-ae16-4968c16c52be" />
+
 **Error:** After entering credentials into `io_config.yaml`, getting an authentication error.
 
 **Cause:** Accidentally hardcoded an extra duplicate key `client_x509_cert_url` in the YAML file.
@@ -117,6 +123,8 @@ cp ../uber_project_backup/data_loaders/*.py data_loaders/
 
 **Error:** Running data exporter fails with a missing Google Cloud library error.
 
+<img width="631" height="444" alt="image" src="https://github.com/user-attachments/assets/d5e59af0-4794-4773-adae-04c319956484" />
+
 **Solution:**
 ```bash
 pip install google-cloud
@@ -126,6 +134,8 @@ pip install google-cloud-bigquery
 ---
 
 ## 10. Missing `db-dtypes` Dependency
+
+<img width="629" height="533" alt="image" src="https://github.com/user-attachments/assets/660f7ad4-8179-4fff-8e1c-c0a5a28513df" />
 
 **Error:** BigQuery export fails due to missing dependency.
 
