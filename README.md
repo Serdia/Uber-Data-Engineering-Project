@@ -104,4 +104,4 @@ git init
 ---
 
 ## Encountered Errors & Solutions
-Detailed troubleshooting notes are documented here: [ERRORS.md](./docs/ERRORS.md)
+Detailed troubleshooting notes are documented here: [ERRORS.md](ERRORS.md)
