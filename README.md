@@ -97,7 +97,11 @@ sudo apt-get install git -y
 
 # Initialize from inside your project folder
 cd ~/uber_project
-git init
+git add uber_project/data_loaders/dl_uber_data.py
+git add uber_project/transformers/tf_uber_data.py
+git add uber_project/pipelines/
+git commit -m "uber project pipeline"
+git push origin master
 ```
 > **Never commit `io_config.yaml`** — it contains your GCP credentials. Add it to `.gitignore`.
 
