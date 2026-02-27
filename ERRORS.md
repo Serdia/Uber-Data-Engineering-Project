@@ -173,3 +173,14 @@ Failed to initialize: Bad git executable.
 ```bash
 sudo apt-get install git -y
 ```
+
+## 13. Initilized git in a wrong folder and it caused lots of issues. Like my project was untracked by github.
+
+<img width="391" height="136" alt="image" src="https://github.com/user-attachments/assets/7dc8dd45-f8a7-47f2-93ee-5fcc1aaef660" />
+
+
+**Solution"**
+deleted neted folder: ``` rm -rf ~/uber_project/uber_project/.git ```
+Generated github token.
+Re-initilized and pushed changes.
+
