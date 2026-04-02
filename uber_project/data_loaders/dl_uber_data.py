@@ -24,7 +24,7 @@ def load_data_from_api(*args, **kwargs):
     """
     try:
         result = client.query(watermark_query).to_dataframe()
-        last_load_time = '2016-03-01'  #result['last_load_time'][0]
+        last_load_time = "2017-01-16" #  result['last_load_time'][0]
 
         
         if pd.isna(last_load_time):
@@ -41,11 +41,13 @@ def load_data_from_api(*args, **kwargs):
         
     
     # Load csv from google cloud storage
-    url = 'https://storage.googleapis.com/os-gcp-bucket/uber_data.csv'
+    url = 'https://storage.googleapis.com/os-gcp-bucket/taxi_sample.csv'
     response = requests.get(url)
 
     #Returns a DataFrame. Loading ALL records from .csv
-    df = pd.read_csv(io.StringIO(response.text), sep=',').head(10) # only return 100 rows 
+    df = pd.read_csv(io.StringIO(response.text), sep=',').head(100) # only return 100 rows 
+    print(df.columns.tolist())  # <-- add this
+    print(df.head(2))           # <-- and this
 
     # convert to datetime
     df['tpep_pickup_datetime'] = pd.to_datetime(df['tpep_pickup_datetime'])
