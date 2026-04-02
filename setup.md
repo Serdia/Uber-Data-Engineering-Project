@@ -1,204 +1,313 @@
-# Uber-Data-Engineering-Project
+# Setup Guide — Uber Data Engineering Project
 
-# Real-Time Ride-Share Analytics Pipeline
+---
 
-## Overview
-End-to-end data pipeline processing ride-share data, 
-demonstrating modern data engineering practices with 
-cloud infrastructure, ETL orchestration, and analytics.
+## 1. Create a GCP Account
 
-## Tips
-Activate .venv bein in home (~) directory (not project)
-Start mage from project folder "Uber Projerct". Not from home directory(~)
-Make sure to install github: ```sudo apt-get install git -y```
+Set up a Google Cloud account and create a new project.
 
-```(.venv) myusername@vm-uber-project:~/uber_project$ mage start uber_project```
+---
 
-## Create google cloud account
+## 2. Upload Data to Google Cloud Storage
 
-## Make data public so I can access it using my code:
-<img width="959" height="173" alt="image" src="https://github.com/user-attachments/assets/09316d5c-6963-415f-858e-3f86a86cbb44" />
+Make the data file publicly accessible:
 
-Permission Error. To fix it, go to "Permissions" --> "Switch to fine-grained"
+- Go to your GCS bucket → Permissions → Switch to **fine-grained**
+- Set public access on the file
 
-<img width="623" height="247" alt="image" src="https://github.com/user-attachments/assets/b4418688-f237-4c8b-9213-faf60d4b610d" />
+---
 
-Now I am able to make it public:
+## 3. Deploy Mage on GCP Compute Engine
 
-<img width="603" height="353" alt="image" src="https://github.com/user-attachments/assets/703e82e3-fff2-4c35-bb22-4f7da0c842ac" />
+1. Create a VM Instance (E2, 4 cores, 16 GB RAM)
+2. SSH into the VM from the GCP Console
+3. Create and activate a virtual environment:
 
-## Deploy Mage to google compute engine
-1. Create VM Instance E2 4 cores 16 Gb
-   
-<img width="1078" height="612" alt="image" src="https://github.com/user-attachments/assets/92ddbc6c-3a43-4524-811e-0d8038113fc9" />
-
-2.Instance is ready
-
-<img width="844" height="128" alt="image" src="https://github.com/user-attachments/assets/0cb3a82b-81e0-4a28-9239-27d2c6064d8d" />
-
-3.Click on SSH to start interacting with VM via shell:
-
-<img width="680" height="200" alt="image" src="https://github.com/user-attachments/assets/139ae79b-bea2-469d-a6b8-183e984c409e" />
-
-4. In SSH terminal create virtual environment using command "python3 -m venv ~/.venv". 
-5. Activate .venv: zoeyserdyuk@vm-uber-project:~$ ```source ~/.venv/bin/activate```
-6. Install Mage using command: pip install mage-ai
-7. Start Mage using command "Mage start myprojectname"
-8. http://localhost:6789
-9. Need to add firewall rule to accept request from 6789
-   Use powershell to get your public IP address, run command (Invoke-WebRequest -Uri "https://api.ipify.org").Content
-   Then enter it 94.205.121.45/32   32 means single IP address (for security)
-10. If Mage server asking for login credentials, use : Email: admin@admin.com   Password: admin
-
-## Create pipeline in Mage:
-
-Load data using API, since my data is publicly available. 
-<img width="626" height="370" alt="image" src="https://github.com/user-attachments/assets/ea8d9f03-265e-4d62-876d-54fe21476f3d" />
-
-2. Copy URL from google storage and paste it in a code. Then click button to test the response to see the data.
-   
-<img width="797" height="695" alt="image" src="https://github.com/user-attachments/assets/a19ebcb0-f23d-4195-b029-558a8a4368ef" />
-
-3. Add "Transformer" to transform our data
-4. Chage return statement in transformer to make it dictionary of dataframes. So then exporter can accept it to BigQuery warehouse.
-     return{
-        "dim_datetime":dim_datetime,
-        "dim_passanger_count":dim_passanger_count,
-        "dim_trip_distance":dim_trip_distance,
-        "dim_rate_code":dim_rate_code,
-        "dim_pickup_location":dim_pickup_location,
-        "dim_dropoff_location":dim_dropoff_location,
-        "dim_payment_type":dim_payment_type,
-        "fact":fact
-    }
-
-## pass this multiple dataframes to the loader function and load this data to the bigquery warehouse. We will pass those dataframe as a dictionary
-
-
-## Configure Exporter:
-1. In google cloud need to get credentials: APIs & Services --> Credentials --> Create credentials --> Service account
-2. Create Account key and add it to io_config.yaml file
-3. Since transformer returns dictionary of dataframes, we need to loop through each key value pair and export it to bigquery. Bq can only accept it one by one:
-```python
-    # loop through each table name in a dictionary
-    # table_name = the name (key from dictionary) 
-    # df = the DataFrame itself (value from dictionary)
-    # data = the entire dictionary containing all table names and DataFrames
-    for table_name, df in data.items():
+```bash
+python3 -m venv mage_env
+source mage_env/bin/activate
 ```
-<img width="536" height="361" alt="image" src="https://github.com/user-attachments/assets/9d6a5bd1-6b6c-4c0a-b6f7-dd0e2de76647" />
 
-Pipeline fun succesfully:
+4. Install Mage and required packages:
 
-<img width="279" height="418" alt="image" src="https://github.com/user-attachments/assets/ae6013be-5733-4ae6-b107-5f527f25f669" />
+```bash
+pip install mage-ai
+/home/zoeyserdyuk/mage_env/bin/pip install google-cloud-bigquery
+/home/zoeyserdyuk/mage_env/bin/pip install db-dtypes
+/home/zoeyserdyuk/mage_env/bin/pip install pandas-gbq
+```
 
-4. All tables succesfully created in BigQuery:
-   
-<img width="308" height="263" alt="image" src="https://github.com/user-attachments/assets/e3aa8666-0608-425c-a61f-cc48f66208d7" />
+5. Create and start your Mage project:
 
-## Join fact table with all dimenstions table and create Analytic table to be used in Looker studio.
+```bash
+mage start uber_project
+```
 
-<img width="582" height="473" alt="image" src="https://github.com/user-attachments/assets/9d410fc8-b73b-4a20-a766-672dc6a6bcde" />
+6. Add a **firewall rule** in GCP to allow traffic on port `6789` from your IP
+7. Access Mage at `http://<your-vm-external-ip>:6789`
+   - Default login: `admin@admin.com` / `admin`
 
-## Build report in looker studio
+> **Important:** Always start Mage from inside your project folder, not the home directory:
+> ```bash
+> cd ~/uber_project
+> mage start uber_project
+> ```
 
+---
 
+## 4. Configure VS Code Remote SSH
 
+Instead of using the GCP Console terminal, you can connect VS Code directly to the VM so you can browse files and edit code like a local project.
 
-## Errors I encountered:
-Error: Mage-AI Installation Issues on GCP VM
-The Problem:
-When trying to install mage-ai using the standard pip install mage-ai command, I encountered this error:
-error: externally-managed-environment
-× This environment is externally managed
-Why This Happened:
-Python 3.11+ introduced a security feature that prevents you from installing packages system-wide with pip. This is to protect the operating system's Python packages from being accidentally broken by user installations.
-On Debian/Ubuntu systems (like GCP VMs), the system Python is "externally managed" meaning:
+### Generate an SSH Key (on your local Windows machine)
 
-The OS uses Python for system tools
-Installing random packages with pip could break system functionality
-Python enforces separation between system packages and user packages
+```powershell
+ssh-keygen -t rsa -b 4096
+```
 
-Why I Used pipx Instead of pip:
-I initially tried pipx as an alternative to pip because:
-pipx:
+This creates two files in `C:\Users\YourName\.ssh\`:
+- `id_rsa` — private key (never share this)
+- `id_rsa.pub` — public key (goes on the server)
 
-Designed for installing Python applications (like mage-ai, black, pytest)
-Automatically creates isolated virtual environments for each application
-Makes commands globally available without polluting system Python
-Good for CLI tools you want to run from anywhere
+### Add the Public Key to the VM
 
-The Real Solution:
-pipx wasn't the right choice for mage-ai because:
+1. Copy the contents of `id_rsa.pub`
+2. In GCP Console → VM Instance → Edit → **SSH Keys** → Add the key and save
 
-Mage needs many dependencies (pandas, polars, pyarrow, etc.)
-pipx creates isolated environments that make dependency management harder
-The tutorial assumes a standard pip installation in a virtual environment.
-So I decided to clean everything up and start over but using virtual environment 
-Commands to remove installed items:
-pipx uninstall mage-ai
-rm -rf ~/myproject
-sudo apt remove pipx
+### Prepare the VM's SSH Folder
 
-Error: ImportError: Pandas requires version '3.1.5' or newer of 'jinja2' (version '3.1.3' currently installed).
-Basically Pandas needs a newer version of jinja2 than what's currently installed.
-Run command: pip install --upgrade pandas jinja2
+SSH into the VM from the GCP Console and run:
 
-Error: Spark config got unexptected Error "Authentication".
-Me playing around with removing login page, I hardcoded value "Authentication: mode: none" in metadata.yaml file. Removing it solved the problem.
+```bash
+mkdir -p ~/.ssh
+chmod 700 ~/.ssh
+touch ~/.ssh/authorized_keys
+chmod 600 ~/.ssh/authorized_keys
+```
 
-<img width="873" height="676" alt="image" src="https://github.com/user-attachments/assets/985a5346-bdd3-454b-a23d-a4b8d5040f4c" />
+Then paste your public key into `~/.ssh/authorized_keys`.
 
-Error: SyntaxError: unexpected character after line continuation character
-Solution: avoided backslashes by wrapping Fact table creation in parentheses.
+### Connect from VS Code
 
-Error: Next day starting Mage I was not able to find files I created. Turned out I accidently created nested folder uber_project.
-To fix that I moved files to proper location and then deleted empty folder uber_project.
-(.venv) zoeyserdyuk@vm-uber-project:~/uber_project/uber_project/transformers$ mv transformer_uber_data.py ~/uber_project/transformers/
+1. Install the **Remote - SSH** extension in VS Code
+2. Press `Ctrl+Shift+P` → type `Remote-SSH: Connect to Host`
+3. Enter: `zoeyserdyuk@<your-vm-external-ip>`
 
-Error:
-Constantly getting "Page Unresponsive" error clicking on Edit pipeline in Mage.
-<img width="788" height="456" alt="image" src="https://github.com/user-attachments/assets/988871f7-5f4f-47fc-9dfa-f208a0610756" />
-Seems like pipeline is corrupted. 
-Deleting and re-creating a new pipeline hopefully resolve the problem.
-cd ~
-backup existing project: cp -r uber_project uber_project_backup
-remove project: rm -rf uber_project
-create new project: mage init uber_project
-# Copy over just your code files (not metadata).
-cd uber_project
-cp ../uber_project_backup/transformers/*.py transformers/   # copy all .py files and put it into destination folder
-cp ../uber_project_backup/data_loaders/*.py data_loaders/
+**How it works:**
 
-Error: Mage UI did is not able to locate files in data loader and transformer. I tried to clear cache, refresh, restart mage etc. But nothing helped. Interestingly enough, I am able to view files using terminal. I guess its some kind of a bug. 
-Solution: I re-created data loader and transformer.
+| Your Windows Machine (`C:\Users\..\.ssh\`) | Google VM (`~/.ssh/`) |
+|---|---|
+| `id_rsa` — private key ("the key") | `authorized_keys` — allowed public keys ("the lock") |
+| `id_rsa.pub` — public key | |
+| `config` — connection settings | |
+| `known_hosts` — known servers | |
 
-Error: after entering connection information into io_config.yaml file getting this error:
-<img width="658" height="172" alt="image" src="https://github.com/user-attachments/assets/43dea727-b0f8-4d8d-ae16-4968c16c52be" />
-Solution: in key value pair I accidently hardcoded extra key:  client_x509_cert_url:. Removing that solved the problem.
+When you connect, VS Code uses your private key to prove identity, and the VM checks `authorized_keys` for a match. If found, access is granted.
 
-Error: running data exporter got an error:
+> **Golden rule:** `id_rsa` (private) stays on your machine forever. `id_rsa.pub` (public) goes on every server you want to access.
 
-<img width="631" height="444" alt="image" src="https://github.com/user-attachments/assets/d5e59af0-4794-4773-adae-04c319956484" />
-Need to install google cloud on VM instance.
-Make sure venv is activated and type command: pip install google-cloud    and pip install google-cloud-bigquery
+---
 
+## 5. Configure BigQuery Credentials (for Mage)
 
-Error:
-<img width="629" height="533" alt="image" src="https://github.com/user-attachments/assets/660f7ad4-8179-4fff-8e1c-c0a5a28513df" />
-Dependency package need to be installed:  pip install db-dtypes.   Handles database data type conversions between BigQuery and pandas.
+1. GCP Console → APIs & Services → Credentials → Create Service Account → Download JSON key
+2. Paste the credentials into `io_config.yaml` inside your Mage project
 
-Error: 
-Was not able to export to bigquery a dictionary of dataframes, because bigquery export() method only accepts one df at a time, not a dictionary.
-Solution: need to loop through the dictionary of dataframes. 
+> **Never commit `io_config.yaml`** — add it to `.gitignore`
 
+---
 
+## 6. Install dbt (Separate from Mage)
 
+> **Why separate?** dbt could not be run natively inside Mage due to environment conflicts. It is installed in its own virtual environment and triggered from Mage using Python's `subprocess` module.
 
+### Create a dbt Virtual Environment
 
+```bash
+python3 -m venv /home/zoeyserdyuk/dbt_env
+source /home/zoeyserdyuk/dbt_env/bin/activate
+pip install dbt-bigquery
+```
 
+### Create the dbt Project Folder
 
+```bash
+mkdir -p /home/zoeyserdyuk/dbt_uber_project
+cd /home/zoeyserdyuk/dbt_uber_project
+```
 
+### Create the GCP Keys Folder and Upload Service Account Key
 
+```bash
+mkdir -p /home/zoeyserdyuk/dbt_uber_project/keys
+```
 
+Upload the service account JSON to your GCS bucket, then copy it to the VM:
 
+```bash
+gsutil cp gs://os-gcp-bucket/key_uber-data-pipeline-service-account.json \
+  /home/zoeyserdyuk/dbt_uber_project/keys/service-account.json
+```
+
+To verify the file is there:
+
+```bash
+find /home/zoeyserdyuk -name "service-accoun*" 2>/dev/null
+```
+
+> **Never commit the key file** — add `keys/` to `.gitignore`
+
+---
+
+## 7. Configure dbt Profiles
+
+The `profiles.yml` file tells dbt how to connect to BigQuery. It is kept **inside the project folder** (not in `~/.dbt/`) because dbt is invoked via `subprocess` with an explicit `--profiles-dir` flag.
+
+Create the file:
+
+```bash
+nano /home/zoeyserdyuk/dbt_uber_project/profiles.yml
+```
+
+Paste the following (replace values with your own GCP project and dataset IDs):
+
+```yaml
+dbt_uber_project:          # must match `profile:` in dbt_project.yml
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: uber-data-pipeline-487320       # GCP project ID
+      dataset: ds_uber_project                 # BigQuery dataset ID
+      keyfile: /home/zoeyserdyuk/dbt_uber_project/keys/service-account.json
+      threads: 4
+      timeout_seconds: 300
+      location: US                             # or EU depending on your BigQuery region
+```
+
+> The profile name `dbt_uber_project` must match exactly what is set under `profile:` in `dbt_project.yml`.
+
+---
+
+## 8. Install dbt Packages
+
+Create `packages.yml` in your dbt project folder:
+
+```bash
+nano /home/zoeyserdyuk/dbt_uber_project/packages.yml
+```
+
+```yaml
+packages:
+  - package: dbt-labs/dbt_utils
+    version: 1.3.0
+```
+
+Then install the packages:
+
+```bash
+/home/zoeyserdyuk/dbt_env/bin/dbt deps \
+  --profiles-dir /home/zoeyserdyuk/dbt_uber_project \
+  --project-dir /home/zoeyserdyuk/dbt_uber_project
+```
+
+This downloads `dbt_utils` into `dbt_packages/dbt_utils/` automatically.
+
+---
+
+## 9. Create dbt Source Config
+
+Create `models/staging/sources.yml` — this tells dbt where your raw data lives in BigQuery:
+
+```bash
+mkdir -p /home/zoeyserdyuk/dbt_uber_project/models/staging
+nano /home/zoeyserdyuk/dbt_uber_project/models/staging/sources.yml
+```
+
+---
+
+## 10. Running dbt Commands
+
+Always activate dbt's virtual environment first and run from the project root:
+
+```bash
+# Activate dbt venv
+source /home/zoeyserdyuk/dbt_env/bin/activate
+
+# Navigate to project root
+cd /home/zoeyserdyuk/dbt_uber_project
+
+# Run all models
+dbt run \
+  --profiles-dir /home/zoeyserdyuk/dbt_uber_project \
+  --project-dir /home/zoeyserdyuk/dbt_uber_project
+
+# Run only staging models
+dbt run --select staging \
+  --profiles-dir /home/zoeyserdyuk/dbt_uber_project \
+  --project-dir /home/zoeyserdyuk/dbt_uber_project
+
+# Full refresh (rebuilds everything from scratch)
+dbt run --full-refresh \
+  --profiles-dir /home/zoeyserdyuk/dbt_uber_project \
+  --project-dir /home/zoeyserdyuk/dbt_uber_project
+```
+
+### Triggering dbt from Mage via subprocess
+
+Because dbt runs in a separate environment, Mage calls it using Python's `subprocess` module:
+
+```python
+import subprocess
+
+result = subprocess.run(
+    [
+        "/home/zoeyserdyuk/dbt_env/bin/dbt",
+        "run",
+        "--profiles-dir", "/home/zoeyserdyuk/dbt_uber_project",
+        "--project-dir", "/home/zoeyserdyuk/dbt_uber_project",
+    ],
+    capture_output=True,
+    text=True
+)
+print(result.stdout)
+print(result.stderr)
+```
+
+---
+
+## 11. Version Control
+
+```bash
+sudo apt-get install git -y
+
+cd ~/uber_project
+git add uber_project/data_loaders/dl_uber_data.py
+git add uber_project/transformers/tf_uber_data.py
+git add uber_project/pipelines/
+git commit -m "uber project pipeline"
+git push origin master
+```
+
+### Recommended `.gitignore`
+
+```
+io_config.yaml
+keys/
+*.json
+dbt_packages/
+```
+
+---
+
+## Quick Reference — Common Commands
+
+| Task | Command |
+|---|---|
+| Activate Mage venv | `source mage_env/bin/activate` |
+| Start Mage | `cd ~/uber_project && mage start uber_project` |
+| Activate dbt venv | `source /home/zoeyserdyuk/dbt_env/bin/activate` |
+| Run dbt | `dbt run --profiles-dir ... --project-dir ...` |
+| Install dbt packages | `dbt deps --profiles-dir ... --project-dir ...` |
+| Find a file on VM | `find /home/zoeyserdyuk -name "filename*" 2>/dev/null` |
